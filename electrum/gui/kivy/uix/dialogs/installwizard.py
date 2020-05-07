@@ -1112,6 +1112,26 @@ class InstallWizard(BaseWizard, Widget):
             f = kwargs['run_next']
             f(choices[0][0])
 
+    def do_nothing(self):
+        print('do nothing')
+
+    def init_network(self, network):
+        message = _("Electrum communicates with remote servers to get "
+                  "information about your transactions and addresses. The "
+                  "servers all fulfill the same purpose only differing in "
+                  "hardware. In most cases you simply want to let Electrum "
+                  "pick one at random.  However if you prefer feel free to "
+                  "select a server manually.")
+        
+        choices = [
+                ('do_nothing', _("Auto connect")), 
+                ('do_nothing', _("Select server manually"))
+                ]
+        title = _("How do you want to connect to a server? ")
+        self.choice_dialog(choices=choices, message=message, title=title, 
+                        run_next=self.run)
+        
+        
     def multisig_dialog(self, **kwargs): WizardMultisigDialog(self, **kwargs).open()
     def show_seed_dialog(self, **kwargs): ShowSeedDialog(self, **kwargs).open()
     def line_dialog(self, **kwargs): LineDialog(self, **kwargs).open()
