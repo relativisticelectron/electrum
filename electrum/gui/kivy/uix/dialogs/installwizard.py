@@ -1073,17 +1073,6 @@ class InititialNetworkWizard(BaseWizard, Widget):
         """overriden by main_window"""
         pass
 
-
-    def choice_dialog(self, **kwargs):
-        choices = kwargs['choices']
-        if len(choices) > 1:
-            d = WizardChoiceDialog(self, **kwargs)
-            d.open()
-        else:
-            f = kwargs['run_next']
-            f(choices[0][0])
-
-
     def terminate(self):
         self.dispatch('on_wizard_complete')
 
@@ -1102,9 +1091,9 @@ class InititialNetworkWizard(BaseWizard, Widget):
                 ('terminate', _("Select server manually"))
                 ]
         title = _("How do you want to connect to a server? ")
-        self.choice_dialog(choices=choices, message=message, title=title, 
-                        run_next=self.run)
-        
+        WizardChoiceDialog(self, choices=choices, message=message, title=title, 
+                        run_next=self.run).open()
+
         
 
 class InstallWizard(BaseWizard, Widget):

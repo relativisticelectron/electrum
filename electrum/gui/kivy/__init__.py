@@ -46,7 +46,8 @@ if TYPE_CHECKING:
     from electrum.daemon import Daemon
     from electrum.plugin import Plugins
 
-
+from kivy.factory import Factory
+from .uix.dialogs.installwizard import InstallWizard
 
 
 class ElectrumGui:
@@ -58,7 +59,26 @@ class ElectrumGui:
         self.config = config
         self.plugins = plugins
 
+
+    def init_network(self):
+        # Show network dialog if config does not exist
+        # popup.open()
+        if self.daemon.network:
+            if self.config.get('auto_connect') is None:
+                wizard = Factory.InititialNetworkWizard(self.config, self.plugins)
+                wizard.init_network(self.daemon.network)
+                wizard.terminate()
+
+
     def main(self):
+        try:
+            self.init_network()
+        except:
+            Logger.exception('')
+            return
+
+
+
         from .main_window import ElectrumWindow
         w = ElectrumWindow(config=self.config,
                            network=self.network,

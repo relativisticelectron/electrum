@@ -356,7 +356,6 @@ class ElectrumWindow(App):
             self.num_blocks = self.network.get_local_height()
             self.num_nodes = len(self.network.get_interfaces())
             net_params = self.network.get_parameters()
-            Logger.info('{}'.format(net_params))
             self.server_host = net_params.server.host
             self.server_port = str(net_params.server.port)
             self.auto_connect = net_params.auto_connect
@@ -386,8 +385,6 @@ class ElectrumWindow(App):
         self.fee_status = self.electrum_config.get_fee_status()
         self.invoice_popup = None
         self.request_popup = None
-
-
 
     def on_pr(self, pr: 'PaymentRequest'):
         if not self.wallet:
@@ -589,29 +586,12 @@ class ElectrumWindow(App):
             util.register_callback(self.on_channel_db, ['channel_db'])
             util.register_callback(self.set_num_peers, ['gossip_peers'])
             util.register_callback(self.set_unknown_channels, ['unknown_channels'])
-
-
         # load wallet
-        self.init_network()
-
+        self.load_wallet_by_name(self.electrum_config.get_wallet_path(use_gui_last_wallet=True))
         # URI passed in config
         uri = self.electrum_config.get('url')
         if uri:
             self.set_URI(uri)
-
-    def on_init_network_wizard_complete(self, wizard):
-        print(0)
-        self.load_wallet_by_name(self.electrum_config.get_wallet_path(use_gui_last_wallet=True))
-        print(1)
-
-
-    def init_network(self):
-        if self.daemon.network:
-            wizard = Factory.InititialNetworkWizard(self.electrum_config, self.plugins)
-            wizard.bind(on_wizard_complete=self.on_init_network_wizard_complete)
-            wizard.init_network(self.daemon.network)
-
-
 
     def on_channel_db(self, event, num_nodes, num_channels, num_policies):
         self.lightning_gossip_num_nodes = num_nodes
