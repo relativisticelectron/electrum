@@ -1059,6 +1059,54 @@ class AddXpubDialog(WizardDialog):
 
 
 
+
+class InititialNetworkWizard(BaseWizard, Widget):
+    '''
+    events::
+        `on_wizard_complete` Fired when the wizard is done creating/ restoring
+        wallet/s.
+    '''
+
+    __events__ = ('on_wizard_complete', )
+
+    def on_wizard_complete(self):        
+        """overriden by main_window"""
+        pass
+
+
+    def choice_dialog(self, **kwargs):
+        choices = kwargs['choices']
+        if len(choices) > 1:
+            d = WizardChoiceDialog(self, **kwargs)
+            d.open()
+        else:
+            f = kwargs['run_next']
+            f(choices[0][0])
+
+
+    def terminate(self):
+        self.dispatch('on_wizard_complete')
+
+
+    def init_network(self, network):
+        message = _("Electrum communicates with remote servers to get "
+                  "information about your transactions and addresses. The "
+                  "servers all fulfill the same purpose only differing in "
+                  "hardware. In most cases you simply want to let Electrum "
+                  "pick one at random.  However if you prefer feel free to "
+                  "select a server manually.")
+        
+
+        choices = [
+                ('terminate', _("Auto connect")), 
+                ('terminate', _("Select server manually"))
+                ]
+        title = _("How do you want to connect to a server? ")
+        self.choice_dialog(choices=choices, message=message, title=title, 
+                        run_next=self.run)
+        
+        
+
 class InstallWizard(BaseWizard, Widget):
     '''
     events::
@@ -1104,33 +1152,17 @@ class InstallWizard(BaseWizard, Widget):
             storage, db = self.create_storage(self.path)
         self.dispatch('on_wizard_complete', storage, db)
 
+
+
     def choice_dialog(self, **kwargs):
         choices = kwargs['choices']
         if len(choices) > 1:
-            WizardChoiceDialog(self, **kwargs).open()
+            d = WizardChoiceDialog(self, **kwargs)
+            d.open()
         else:
             f = kwargs['run_next']
             f(choices[0][0])
 
-    def do_nothing(self):
-        print('do nothing')
-
-    def init_network(self, network):
-        message = _("Electrum communicates with remote servers to get "
-                  "information about your transactions and addresses. The "
-                  "servers all fulfill the same purpose only differing in "
-                  "hardware. In most cases you simply want to let Electrum "
-                  "pick one at random.  However if you prefer feel free to "
-                  "select a server manually.")
-        
-        choices = [
-                ('do_nothing', _("Auto connect")), 
-                ('do_nothing', _("Select server manually"))
-                ]
-        title = _("How do you want to connect to a server? ")
-        self.choice_dialog(choices=choices, message=message, title=title, 
-                        run_next=self.run)
-        
         
     def multisig_dialog(self, **kwargs): WizardMultisigDialog(self, **kwargs).open()
     def show_seed_dialog(self, **kwargs): ShowSeedDialog(self, **kwargs).open()

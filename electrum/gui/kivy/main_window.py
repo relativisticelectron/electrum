@@ -389,15 +389,6 @@ class ElectrumWindow(App):
 
 
 
-    def init_network(self):
-        if self.daemon.network:
-            wizard = Factory.InstallWizard(self.electrum_config, self.plugins)
-            Logger.info('=============================  {} '.format(wizard))
-            wizard.init_network(self.daemon.network)
-            # wizard.terminate()
-
-
-
     def on_pr(self, pr: 'PaymentRequest'):
         if not self.wallet:
             self.show_error(_('No wallet loaded.'))
@@ -599,19 +590,28 @@ class ElectrumWindow(App):
             util.register_callback(self.set_num_peers, ['gossip_peers'])
             util.register_callback(self.set_unknown_channels, ['unknown_channels'])
 
-        try:
-            self.init_network()
-        except:
-            Logger.exception('')
-            return
-
 
         # load wallet
-        self.load_wallet_by_name(self.electrum_config.get_wallet_path(use_gui_last_wallet=True))
+        self.init_network()
+
         # URI passed in config
         uri = self.electrum_config.get('url')
         if uri:
             self.set_URI(uri)
+
+    def on_init_network_wizard_complete(self, wizard):
+        print(0)
+        self.load_wallet_by_name(self.electrum_config.get_wallet_path(use_gui_last_wallet=True))
+        print(1)
+
+
+    def init_network(self):
+        if self.daemon.network:
+            wizard = Factory.InititialNetworkWizard(self.electrum_config, self.plugins)
+            wizard.bind(on_wizard_complete=self.on_init_network_wizard_complete)
+            wizard.init_network(self.daemon.network)
+
+
 
     def on_channel_db(self, event, num_nodes, num_channels, num_policies):
         self.lightning_gossip_num_nodes = num_nodes
